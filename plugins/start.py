@@ -169,11 +169,19 @@ async def start_command(client: Bot, message: Message):
                     escaped_username = escape_markdown(channel_username)
                     escaped_photo_link = photo_link  # URL doesn't need escaping in MarkdownV2
                     
+
                     caption = (
     f"[{escaped_title}]\n"
     f"{escaped_username}\n"
     f"<blockquote>• Audio: Hindi\n• Quality: 480p + 720p + 1080p</blockquote>\n\n"
     f"This link will expire in {expire_seconds} seconds."
+)
+
+await bot.send_photo(
+    chat_id,
+    photo=file_path,
+    caption=caption,
+    parse_mode="HTML"
 )
                     
                     await message.reply_photo(
