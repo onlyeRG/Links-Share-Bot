@@ -171,7 +171,7 @@ async def start_command(client: Bot, message: Message):
                     
                     caption = (
     f"<b>{escaped_title}</b>\n"
-    f"{escaped_username}\n"
+    f"{escaped_username}"
     f"<blockquote>• Audio: Hindi\n• Quality: 480p + 720p + 1080p</blockquote>\n\n"
     f"This link will expire in {expire_seconds} seconds."
                     )
