@@ -11,6 +11,7 @@ database = dbclient[DB_NAME]
 user_data = database['users']
 channels_collection = database['channels']
 fsub_channels_collection = database['fsub_channels']
+banned_users_collection = database['banned_users']
 
 async def add_user(user_id: int) -> bool:
     """Add a user to the database if they don't exist."""
@@ -377,3 +378,57 @@ async def is_approval_off(channel_id: int) -> bool:
     except Exception as e:
         print(f"Error checking approval_off for channel {channel_id}: {e}")
         return False
+
+async def ban_user(user_id: int, banned_by: int, reason: str = None) -> bool:
+    """Ban a user from using the bot."""
+    if not isinstance(user_id, int) or user_id <= 0:
+        print(f"Invalid user_id: {user_id}")
+        return False
+    
+    try:
+        await banned_users_collection.update_one(
+            {'_id': user_id},
+            {
+                '$set': {
+                    '_id': user_id,
+                    'banned_by': banned_by,
+                    'reason': reason,
+                    'banned_at': datetime.utcnow(),
+                    'status': 'banned'
+                }
+            },
+            upsert=True
+        )
+        return True
+    except Exception as e:
+        print(f"Error banning user {user_id}: {e}")
+        return False
+
+async def unban_user(user_id: int) -> bool:
+    """Unban a user."""
+    try:
+        result = await banned_users_collection.delete_one({'_id': user_id})
+        return result.deleted_count > 0
+    except Exception as e:
+        print(f"Error unbanning user {user_id}: {e}")
+        return False
+
+async def is_banned(user_id: int) -> bool:
+    """Check if a user is banned."""
+    if not isinstance(user_id, int):
+        return False
+    try:
+        banned_user = await banned_users_collection.find_one({'_id': user_id, 'status': 'banned'})
+        return bool(banned_user)
+    except Exception as e:
+        print(f"Error checking ban status for {user_id}: {e}")
+        return False
+
+async def get_banned_users() -> list:
+    """Get all banned users."""
+    try:
+        banned = await banned_users_collection.find({'status': 'banned'}).to_list(None)
+        return banned
+    except Exception as e:
+        print(f"Error fetching banned users: {e}")
+        return []
