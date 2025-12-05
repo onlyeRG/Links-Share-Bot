@@ -58,6 +58,7 @@ class Bot(Client):
             # Check if user is banned
             if await is_banned(user_id):
                 # Silently ignore banned users - bot returns nothing
+                print(f"[v0] Blocked message from banned user: {user_id}")
                 message.stop_propagation()
                 return
             
